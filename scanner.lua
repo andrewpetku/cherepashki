@@ -1,3 +1,25 @@
+-- ===== Monitor setup =====
+local monitor = peripheral.find("monitor")
+if monitor then
+  monitor.setTextScale(0.5)   -- подбери: 0.5 / 1 / 2
+  monitor.clear()
+  monitor.setCursorPos(1, 1)
+end
+
+local function log(...)
+  -- вывод в терминал
+  print(...)
+
+  -- вывод на монитор
+  if monitor then
+    local text = table.concat({...}, " ")
+    monitor.write(text)
+    local x, y = monitor.getCursorPos()
+    monitor.setCursorPos(1, y + 1)
+  end
+end
+
+-- ===== Scanner logic =====
 local sides = {
   "front",
   "back",
@@ -7,11 +29,12 @@ local sides = {
   "bottom"
 }
 
-print("=== Inventory scan started ===")
+log("=== Inventory scan started ===")
 
 for _, side in ipairs(sides) do
   if not peripheral.isPresent(side) then
-    print("\nSide:", side, "- nothing connected")
+    log("")
+    log("Side:", side, "- nothing connected")
   else
     local types = peripheral.getType(side)
     if type(types) == "table" then
@@ -21,30 +44,32 @@ for _, side in ipairs(sides) do
     local p = peripheral.wrap(side)
     local name = peripheral.getName(p)
 
-    print("\nSide:", side)
-    print("Peripheral type:", types)
-    print("Peripheral name:", name)
+    log("")
+    log("Side:", side)
+    log("Peripheral type:", types)
+    log("Peripheral name:", name)
 
     if peripheral.hasType(side, "inventory") then
       local size = p.size()
-      print("Slots:", size)
+      log("Slots:", size)
 
       for slot = 1, size do
         local item = p.getItemDetail(slot)
         if item then
-          print(
+          log(
             " Slot", slot,
             "|", item.name,
             "| count:", item.count
           )
         else
-          print(" Slot", slot, "| empty")
+          log(" Slot", slot, "| empty")
         end
       end
     else
-      print("Not an inventory")
+      log("Not an inventory")
     end
   end
 end
 
-print("\n=== Scan finished ===")
+log("")
+log("=== Scan finished ===")
