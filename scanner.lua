@@ -10,22 +10,27 @@ local sides = {
 print("=== Inventory scan started ===")
 
 for _, side in ipairs(sides) do
-  if peripheral.isPresent(side) then
-    local pType = peripheral.getType(side)
-    local pName = peripheral.getName(side)
+  if not peripheral.isPresent(side) then
+    print("\nSide:", side, "- nothing connected")
+  else
+    local types = peripheral.getType(side)
+    if type(types) == "table" then
+      types = table.concat(types, ", ")
+    end
+
+    local p = peripheral.wrap(side)
+    local name = peripheral.getName(p)
 
     print("\nSide:", side)
-    print("Peripheral type:", pType)
-    print("Peripheral name:", pName)
+    print("Peripheral type:", types)
+    print("Peripheral name:", name)
 
     if peripheral.hasType(side, "inventory") then
-      local inv = peripheral.wrap(side)
-      local size = inv.size()
-
+      local size = p.size()
       print("Slots:", size)
 
       for slot = 1, size do
-        local item = inv.getItemDetail(slot)
+        local item = p.getItemDetail(slot)
         if item then
           print(
             " Slot", slot,
@@ -39,8 +44,6 @@ for _, side in ipairs(sides) do
     else
       print("Not an inventory")
     end
-  else
-    print("\nSide:", side, "- nothing connected")
   end
 end
 
